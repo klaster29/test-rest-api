@@ -1,7 +1,7 @@
 package com.task.musala.service;
 
-import com.task.musala.Exceptions.MedicationWeightExceededException;
-import com.task.musala.Exceptions.NotFoundException;
+import com.task.musala.exceptions.MedicationWeightExceededException;
+import com.task.musala.exceptions.NotFoundException;
 import com.task.musala.entity.DroneEntity;
 import com.task.musala.entity.DroneState;
 import com.task.musala.entity.MedicationEntity;

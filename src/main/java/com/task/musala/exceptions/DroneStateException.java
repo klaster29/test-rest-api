@@ -1,4 +1,4 @@
-package com.task.musala.Exceptions;
+package com.task.musala.exceptions;
 
 public class DroneStateException extends RuntimeException {
     public DroneStateException(String message) {

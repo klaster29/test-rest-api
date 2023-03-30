@@ -3,9 +3,9 @@ package com.task.musala.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.task.musala.Exceptions.DroneStateException;
-import com.task.musala.Exceptions.MedicationWeightExceededException;
-import com.task.musala.Exceptions.NotFoundException;
+import com.task.musala.exceptions.DroneStateException;
+import com.task.musala.exceptions.MedicationWeightExceededException;
+import com.task.musala.exceptions.NotFoundException;
 import com.task.musala.entity.DroneEntity;
 import com.task.musala.entity.MedicationEntity;
 import com.task.musala.model.Drone;

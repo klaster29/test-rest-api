@@ -2,17 +2,19 @@
 This class contains endpoints to register drones, load medications into drones, get loaded medications, available drones for loading medications, and drone battery level.  
 
 ## Technologies:  
-Spring Boot  
-Spring Data JPA  
-H2 Database  
-JUnit Jupiter  
-Mockito  
-Gradle    
-REST API
+• Spring Boot  
+• Spring Data JPA  
+• H2 Database  
+• JUnit Jupiter  
+• Mockito  
+• Gradle    
+• Liquibase  
+• REST API
 
 ## Endpoints:  
 ### Register Drone
-URL: POST /drone-service/register-drone  
+URL: POST /drone-service/register-drone
+
 Request Body: DroneEntity  
 Example:  
 {
@@ -22,16 +24,19 @@ Example:
 "batteryCapacity": 100,  
 "state": "IDLE",  
 "loadedMedications": []
-}  
+}
+
 Response:  
 201 CREATED if drone successfully registered  
 400 BAD REQUEST if the drone with the given serial number already exists or if the request is invalid  
 500 INTERNAL SERVER ERROR if an unexpected error occurs while registering the drone  
 ### Load Drone  
 URL: POST /drone-service/load-drone?serialNumber={serialNumber}  
+
 Request Params:
 serialNumber: String (required)  
-Request Body: List of MedicationEntity
+Request Body: List of MedicationEntity  
+
 [
 {
 "id": 1,  
@@ -58,6 +63,7 @@ Request Body: List of MedicationEntity
 "droneEntity": null
 }
 ]  
+
 Response:  
 200 OK if the drone was successfully loaded with medications  
 400 BAD REQUEST if the drone with the given serial number is not found, is not in the idle state, or the request is invalid  

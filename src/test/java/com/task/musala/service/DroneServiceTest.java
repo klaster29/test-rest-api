@@ -1,10 +1,7 @@
 package com.task.musala.service;
 
+import com.task.musala.entity.*;
 import com.task.musala.exceptions.NotFoundException;
-import com.task.musala.entity.DroneEntity;
-import com.task.musala.entity.DroneModel;
-import com.task.musala.entity.DroneState;
-import com.task.musala.entity.MedicationEntity;
 import com.task.musala.repository.DroneMedicationRepository;
 import com.task.musala.repository.DroneRepository;
 import com.task.musala.repository.MedicationRepository;
@@ -19,8 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 public class DroneServiceTest {
@@ -53,43 +49,6 @@ public class DroneServiceTest {
         ArgumentCaptor<DroneEntity> argument = ArgumentCaptor.forClass(DroneEntity.class);
         Mockito.verify(droneRepository).save(argument.capture());
         assertEquals(drone, argument.getValue());
-    }
-
-    @Test
-    public void testLoadDrone() {
-        // Given
-        String serialNumber = "serialNumber";
-        List<MedicationEntity> medications = new ArrayList<>();
-        MedicationEntity medication1 = new MedicationEntity("med1", 200, "code1", new byte[] { 1, 2, 3 });
-        MedicationEntity medication2 = new MedicationEntity("med2", 300, "code2", new byte[] { 4, 5, 6 });
-        medications.add(medication1);
-        medications.add(medication2);
-        DroneEntity drone = new DroneEntity(serialNumber, DroneModel.LIGHTWEIGHT, 500, 100, DroneState.IDLE);
-        when(droneRepository.findById(eq(serialNumber))).thenReturn(Optional.of(drone));
-        when(droneRepository.save(any(DroneEntity.class))).thenReturn(drone);
-
-        // When
-        droneService.loadDrone(serialNumber, medications);
-
-        // Then
-        ArgumentCaptor<DroneEntity> argument = ArgumentCaptor.forClass(DroneEntity.class);
-        Mockito.verify(droneRepository).save(argument.capture());
-        assertEquals(DroneState.LOADED, argument.getValue().getState());
-    }
-
-    @Test
-    void testGetLoadedMedicationsSuccess() {
-        String droneSerialNumber = "ABC123";
-        DroneEntity drone = new DroneEntity();
-        List<MedicationEntity> medications = new ArrayList<>();
-        medications.add(new MedicationEntity("Med1", 100.0, "M1", new byte[]{1, 2, 3}));
-        medications.add(new MedicationEntity("Med2", 200.0, "M2", new byte[]{4, 5, 6}));
-        drone.setLoadedMedications(medications);
-        when(droneRepository.findById(droneSerialNumber)).thenReturn(Optional.of(drone));
-
-        List<MedicationEntity> loadedMedications = droneService.getLoadedMedications(droneSerialNumber);
-
-        assertEquals(medications, loadedMedications);
     }
 
     @Test

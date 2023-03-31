@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DroneMedicationRepository extends JpaRepository<DroneMedicationEntity, DroneMedicationId> {
-
     Optional<List<DroneMedicationEntity>> findByDroneEntity(DroneEntity droneEntity);
 }
 

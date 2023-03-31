@@ -1,5 +1,6 @@
 package com.task.musala.service;
 
+import com.task.musala.entity.DroneMedicationEntity;
 import com.task.musala.exceptions.MedicationWeightExceededException;
 import com.task.musala.exceptions.NotFoundException;
 import com.task.musala.entity.DroneEntity;
@@ -7,6 +8,7 @@ import com.task.musala.entity.DroneState;
 import com.task.musala.entity.MedicationEntity;
 import com.task.musala.repository.DroneMedicationRepository;
 import com.task.musala.repository.DroneRepository;
+import com.task.musala.repository.MedicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -14,17 +16,21 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DroneService {
 
     private final DroneRepository droneRepository;
     private final DroneMedicationRepository droneMedicationRepository;
+    private final MedicationRepository medicationRepository;
 
     @Autowired
-    public DroneService(DroneRepository droneRepository, DroneMedicationRepository droneMedicationRepository) {
+    public DroneService(DroneRepository droneRepository, DroneMedicationRepository droneMedicationRepository,
+                        MedicationRepository medicationRepository) {
         this.droneRepository = droneRepository;
         this.droneMedicationRepository = droneMedicationRepository;
+        this.medicationRepository = medicationRepository;
     }
 
     public void registerDrone(DroneEntity drone) throws IllegalStateException, DuplicateKeyException{
@@ -41,6 +47,7 @@ public class DroneService {
             throws IllegalArgumentException, IllegalStateException, NotFoundException {
 
         checkFieldsConstraints(medications);
+        validateMedications(medications);
         DroneEntity drone = droneRepository.findById(droneSerialNumber)
                 .orElseThrow(() -> new NotFoundException("Drone not found"));
 
@@ -52,17 +59,22 @@ public class DroneService {
         if (totalWeight > weightLimit) {
             throw new MedicationWeightExceededException("Exceeded maximum weight limit");
         }
-        drone.loadMedications(medications);
-        droneRepository.save(drone);
+        for (MedicationEntity medication : medications) {
+            DroneMedicationEntity tmpEntity = new DroneMedicationEntity(drone, medication);
+            droneMedicationRepository.save(tmpEntity);
+        }
     }
 
     public List<MedicationEntity> getLoadedMedications(String droneSerialNumber) {
-        Optional<DroneEntity> optionalDrone = droneRepository.findById(droneSerialNumber);
-        if (optionalDrone.isPresent()) {
-            return optionalDrone.get().getLoadedMedications();
-        } else {
-            throw new NotFoundException("Drone not found");
-        }
+        DroneEntity drone = droneRepository.findBySerialNumber(droneSerialNumber)
+                .orElseThrow(() -> new NotFoundException("Drone not found"));
+        List<DroneMedicationEntity> droneMedications = droneMedicationRepository.findByDroneEntity(drone)
+                .orElseThrow(() -> new NotFoundException("Drone's medication not found"));
+
+        return droneMedications.stream()
+                .map(dmEntity -> medicationRepository.findById(dmEntity.getMedicationEntity().getId())
+                        .orElseThrow(() -> new NotFoundException("Medication not found")))
+                .collect(Collectors.toList());
     }
 
     public List<DroneEntity> getAvailableDronesForLoading() {
@@ -97,6 +109,11 @@ public class DroneService {
                 throw new IllegalArgumentException("You could use only letters, numbers, '-' and ''");
             }
         }
+    }
+
+    private void validateMedications(List<MedicationEntity> medications) throws  NotFoundException{
+        medications.forEach(medication -> medicationRepository.findByName(medication.getName()).orElseThrow(
+                () -> new NotFoundException("Medication " + medication.getName() + " doesn't exist")));
     }
 
 }

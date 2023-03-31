@@ -26,9 +26,6 @@ dependencies {
 	implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.20.0'
 	implementation group: 'org.mockito', name: 'mockito-core', version: '5.2.0'
 	implementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.2'
-    testImplementation 'org.projectlombok:lombok:1.18.22'
-    compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

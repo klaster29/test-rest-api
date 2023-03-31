@@ -10,12 +10,18 @@ public class DroneMedicationEntity {
     private DroneMedicationId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("droneSerialNumber")
+    @JoinColumn(name = "drone_entity_serial_number")
     private DroneEntity droneEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("medicationId")
+    @JoinColumn(name = "medication_id", insertable = false, updatable = false)
     private MedicationEntity medicationEntity;
+
+    public DroneMedicationEntity(DroneEntity drone, MedicationEntity medication) {
+        droneEntity = drone;
+        medicationEntity = medication;
+        id = new DroneMedicationId(drone.getSerialNumber(), medication.getId());
+    }
 
     public DroneMedicationId getId() {
         return id;

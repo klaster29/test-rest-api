@@ -5,6 +5,7 @@ import com.task.musala.exceptions.NotFoundException;
 import com.task.musala.entity.DroneEntity;
 import com.task.musala.entity.DroneState;
 import com.task.musala.entity.MedicationEntity;
+import com.task.musala.repository.DroneMedicationRepository;
 import com.task.musala.repository.DroneRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -18,10 +19,12 @@ import java.util.Optional;
 public class DroneService {
 
     private final DroneRepository droneRepository;
+    private final DroneMedicationRepository droneMedicationRepository;
 
     @Autowired
-    public DroneService(DroneRepository droneRepository) {
+    public DroneService(DroneRepository droneRepository, DroneMedicationRepository droneMedicationRepository) {
         this.droneRepository = droneRepository;
+        this.droneMedicationRepository = droneMedicationRepository;
     }
 
     public void registerDrone(DroneEntity drone) throws IllegalStateException, DuplicateKeyException{
@@ -37,23 +40,20 @@ public class DroneService {
     public void loadDrone(String droneSerialNumber, List<MedicationEntity> medications)
             throws IllegalArgumentException, IllegalStateException, NotFoundException {
 
-        checkConstraints(medications);
-        Optional<DroneEntity> optionalDrone = droneRepository.findById(droneSerialNumber);
-        if (optionalDrone.isPresent()) {
-            DroneEntity drone = optionalDrone.get();
-            if (drone.getBatteryLevel() < 25 && drone.getState() == DroneState.IDLE) {
-                throw new IllegalStateException("Drone battery level is too low to start loading");
-            }
-            double totalWeight = medications.stream().mapToDouble(MedicationEntity::getWeight).sum();
-            double weightLimit = 500.0;
-            if (totalWeight > weightLimit) {
-                throw new MedicationWeightExceededException("Exceeded maximum weight limit");
-            }
-            drone.loadMedications(medications);
-            droneRepository.save(drone);
-        } else {
-            throw new NotFoundException("Drone not found");
+        checkFieldsConstraints(medications);
+        DroneEntity drone = droneRepository.findById(droneSerialNumber)
+                .orElseThrow(() -> new NotFoundException("Drone not found"));
+
+        if (drone.getBatteryLevel() < 25 && drone.getState() == DroneState.IDLE) {
+            throw new IllegalStateException("Drone battery level is too low to start loading");
         }
+        double totalWeight = medications.stream().mapToDouble(MedicationEntity::getWeight).sum();
+        double weightLimit = 500.0;
+        if (totalWeight > weightLimit) {
+            throw new MedicationWeightExceededException("Exceeded maximum weight limit");
+        }
+        drone.loadMedications(medications);
+        droneRepository.save(drone);
     }
 
     public List<MedicationEntity> getLoadedMedications(String droneSerialNumber) {
@@ -88,7 +88,7 @@ public class DroneService {
         return loadedDrones;
     }
 
-    private void checkConstraints(List<MedicationEntity> medications) throws IllegalStateException{
+    private void checkFieldsConstraints(List<MedicationEntity> medications) throws IllegalStateException{
         for (MedicationEntity entity : medications) {
             if (!entity.getCode().matches("^[A-Z_\\d]+$")) {
                 throw new IllegalArgumentException("you could use only upper case letters, underscore and numbers");

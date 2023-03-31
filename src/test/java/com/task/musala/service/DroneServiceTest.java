@@ -5,6 +5,7 @@ import com.task.musala.entity.DroneEntity;
 import com.task.musala.entity.DroneModel;
 import com.task.musala.entity.DroneState;
 import com.task.musala.entity.MedicationEntity;
+import com.task.musala.repository.DroneMedicationRepository;
 import com.task.musala.repository.DroneRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,15 @@ public class DroneServiceTest {
 
     @Mock
     private DroneRepository droneRepository;
+    @Mock
+    private DroneMedicationRepository droneMedicationRepository;
 
     private DroneService droneService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        droneService = new DroneService(droneRepository);
+        droneService = new DroneService(droneRepository, droneMedicationRepository);
     }
 
     @Test
